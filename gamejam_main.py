@@ -19,7 +19,7 @@ def toggle_playing():
     print(is_in_game)
 
 
-def __main__():
+def main():
     size = (0, 0)
     flags = pygame.FULLSCREEN | pygame.HWSURFACE
     screen = pygame.display.set_mode(size, flags, vsync=1)
@@ -96,4 +96,4 @@ def __main__():
 
 
 if __name__ == "__main__":
-    __main__()
+    main()
