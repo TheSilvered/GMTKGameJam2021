@@ -6,7 +6,8 @@ class Element:
     def __init__(
        self,
        size: tuple[int, int],
-       pos: tuple[int, int]):  # Position of the centre
+       pos: tuple[int, int],
+       visible: bool = True):  # Position of the centre
 
         self.pos = pos
         self.x = pos[0]
@@ -31,6 +32,8 @@ class Element:
         self.width = size[0]
         self.height = size[1]
 
+        self.visible = visible
+
 
 class Image(Element):
     def __init__(
@@ -46,22 +49,34 @@ class Button(Element):
        pos: tuple[int, int],  # Position of the centre
        function: str,
        size: tuple[int, int],
+       args: list = None,
+       kwargs: dict = None,
        text: str = "",
        text_style: str = "",
        text_offset: tuple[int, int] = (0, 0),
        font_face: str = FONT_FACE,
        text_color: tuple[int, int, int] = BLACK,
        color: tuple[int, int, int] = WHITE,
+       bg_color: tuple[int, int, int] = BG_COLOR,
        hovered_color: tuple[int, int, int] = None,
        clicked_color: tuple[int, int, int] = None,
-       curve: int = 0
+       curve: int = 0,
+       halo: int = 0,  # Is automatically set to be even
+       visible: bool = True
     ):
-        super().__init__(size, pos)
+        super().__init__(size, pos, visible)
 
+        if args is None:
+            args = []
+        if kwargs is None:
+            kwargs = {}
         self.func = function
+        self._args = args
+        self._kwargs = kwargs
 
         text_style = text_style.split()
-        b_font = pygame.font.SysFont(font_face, self.height - self.height//4)
+        font_size = self.height - self.height//4
+        b_font = pygame.font.SysFont(font_face, font_size)
         if "bold" in text_style:
             b_font.set_bold(True)
         if "italic" in text_style:
@@ -75,10 +90,13 @@ class Button(Element):
             hovered_color = color
         if clicked_color is None:
             clicked_color = hovered_color
-        self._c = color
+        self._c  = color
         self._hc = hovered_color
         self._cc = clicked_color
+        self._bg = bg_color
         
+        if halo % 2: halo -= 1
+        self._halo = halo
         self._curve = curve
 
     @property
@@ -86,60 +104,92 @@ class Button(Element):
         mousex = pygame.mouse.get_pos()[0]
         mousey = pygame.mouse.get_pos()[1]
 
-        return self.L<mousex<self.R and self.U<mousey<self.D
+        return self.L < mousex < self.R and self.U < mousey < self.D
 
     @property
     def clicked(self):
         return self.hovered and pygame.mouse.get_pressed(3)[0]
 
     def render(self, surface):
+        if not self.visible:
+            return
+
         if   self.clicked: color = self._cc
         elif self.hovered: color = self._hc
         else:              color = self._c
 
-        angle1 = (self.LU[0]+self._curve + 1, self.LU[1]+self._curve + 1)
-        angle2 = (self.RU[0]-self._curve, self.RU[1]+self._curve + 1)
-        angle3 = (self.RD[0]-self._curve, self.RD[1]-self._curve)
-        angle4 = (self.LD[0]+self._curve + 1, self.LD[1]-self._curve)
+        if self.hovered:
+            halo = int(self._halo * 1.5)
+        else:
+            halo = self._halo
+
+        button_surface = pygame.Surface(self.size)
+        button_surface.fill(self._bg)
+
+        # Without the "+ 1"s the curves would not be consistent
+        angle1 = (             self._curve + 1, self._curve + 1          )
+        angle2 = (self.width - self._curve    , self._curve + 1          )
+        angle3 = (self.width - self._curve    , self.height - self._curve)
+        angle4 = (             self._curve + 1, self.height - self._curve)
 
         points = (
-            (self.LU[0], self.LU[1] + self._curve + 1),
-            (self.LU[0] + self._curve + 1, self.LU[1]),
-            (self.RU[0] - self._curve, self.RU[1]),
-            (self.RU[0], self.RU[1] + self._curve + 1),
-            (self.RD[0], self.RD[1] - self._curve),
-            (self.RD[0] - self._curve, self.RD[1]),
-            (self.LD[0] + self._curve + 1, self.LD[1]),
-            (self.LD[0], self.LD[1] - self._curve)
+            (0                           ,               self._curve + 1),
+            (             self._curve + 1, 0                            ),
+            (self.width - self._curve    , 0                            ),
+            (self.width                  ,               self._curve + 1),
+            (self.width                  , self.height - self._curve    ),
+            (self.width - self._curve    , self.height                  ),
+            (             self._curve + 1, self.height                  ),
+            (0                           , self.height - self._curve    )
         )
         text_pos = (
-            self.x - self._text.get_width()//2 + self._text_offset[0],
+            self.x - self._text.get_width()//2  + self._text_offset[0],
             self.y - self._text.get_height()//2 + self._text_offset[1]
         )
 
         # Main body
-        pygame.draw.polygon(surface, color, points)
+        pygame.draw.polygon(button_surface, color, points)
         
         # Rounds edges
-        pygame.draw.circle(surface, color,angle1, self._curve)
-        pygame.draw.circle(surface, color,angle2, self._curve)
-        pygame.draw.circle(surface, color,angle3, self._curve)
-        pygame.draw.circle(surface, color,angle4, self._curve)
+        pygame.draw.circle(button_surface, color,angle1, self._curve)
+        pygame.draw.circle(button_surface, color,angle2, self._curve)
+        pygame.draw.circle(button_surface, color,angle3, self._curve)
+        pygame.draw.circle(button_surface, color,angle4, self._curve)
 
-        # Adds text
+        surface.blit(button_surface, self.LU)
+
+        if self._halo > 0:
+            alpha = 0 + 255//halo
+            button_surface.set_alpha(alpha)
+            for i in range(0, halo, 2):
+                new_size = (self.width + i, self.height + i)
+                new_pos = (self.L - i//2, self.U - i//2)
+                new_bs = pygame.transform.scale(button_surface, new_size)
+                surface.blit(new_bs, new_pos)
+                alpha += alpha
+
+        # Adds text now
+        # The text should not be affected by the halo
         surface.blit(self._text, text_pos)
+
+    def execute(self):
+        if not self.visible:
+            return
+
+        self.func(*self._args, **self._kwargs)
 
 
 class Label(Element):
     def __init__(
        self,
-       text: str,
        pos: tuple[int, int],
-       text_color: tuple[int, int, int],
-       text_style: str,
+       text: str,
        font_size: int,
-       font_face: str,
-       tilt: float):
+       text_color: tuple[int, int, int] = BLACK,
+       text_style: str = "",
+       font_face: str = FONT_FACE,
+       tilt: float = 0,
+       visible: bool = True):
 
         text_style = text_style.split()
         b_font = pygame.font.SysFont(font_face, font_size)
@@ -161,7 +211,7 @@ class Label(Element):
             pos[1] - self.height / 2
         )
 
-        super().__init__((self.width, self.height), pos)
+        super().__init__((self.width, self.height), pos, visible)
 
     def render(self, surface):
         surface.blit(self._text, self.pos)
