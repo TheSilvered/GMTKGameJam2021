@@ -9,7 +9,7 @@ import webbrowser as wb
 pygame.init()
 clock = pygame.time.Clock()
 
-current_layout = "credits"
+current_layout = "main_menu"
 
 
 def set_layout(layout_name):
@@ -135,7 +135,7 @@ def main():
 
         ], "statics": [
             Label(
-                pos=(centre_x, centre_y - 400),
+                pos=(centre_x, centre_y - screen.get_height()//2.7),
                 text="This game was made by:",
                 font_size=100
             ),
