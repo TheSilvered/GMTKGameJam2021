@@ -9,4 +9,7 @@ CYAN = (0, 255, 255)
 BLUE = (0, 0, 255)
 PURPLE = (255, 0, 255)
 
+TXT_COLOR = WHITE
+BUTTON_COLOR = BLACK
+
 FONT_FACE = "segoeui"

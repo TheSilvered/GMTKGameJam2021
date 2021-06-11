@@ -29,8 +29,8 @@ class Element:
         self.RD = (self.R, self.D)
 
         self.size = size
-        self.width = size[0]
-        self.height = size[1]
+        self.width = self.size[0]
+        self.height = self.size[1]
 
         self.visible = visible
 
@@ -55,16 +55,14 @@ class Button(Element):
        text_style: str = "",
        text_offset: tuple[int, int] = (0, 0),
        font_face: str = FONT_FACE,
-       text_color: tuple[int, int, int] = BLACK,
-       color: tuple[int, int, int] = WHITE,
+       text_color: tuple[int, int, int] = TXT_COLOR,
+       color: tuple[int, int, int] = BUTTON_COLOR,
        bg_color: tuple[int, int, int] = BG_COLOR,
        hovered_color: tuple[int, int, int] = None,
        clicked_color: tuple[int, int, int] = None,
        curve: int = 0,
        halo: int = 0,  # Is automatically set to be even
-       visible: bool = True
-    ):
-        super().__init__(size, pos, visible)
+       visible: bool = True):
 
         if args is None:
             args = []
@@ -75,7 +73,7 @@ class Button(Element):
         self._kwargs = kwargs
 
         text_style = text_style.split()
-        font_size = self.height - self.height//4
+        font_size = size[1] - size[1]//4
         b_font = pygame.font.SysFont(font_face, font_size)
         if "bold" in text_style:
             b_font.set_bold(True)
@@ -98,6 +96,11 @@ class Button(Element):
         if halo % 2: halo -= 1
         self._halo = halo
         self._curve = curve
+
+        if size[0] is None:
+            size = (self._text.get_width(), size[1])
+
+        super().__init__(size, pos, visible)
 
     @property
     def hovered(self):
@@ -185,7 +188,7 @@ class Label(Element):
        pos: tuple[int, int],
        text: str,
        font_size: int,
-       text_color: tuple[int, int, int] = BLACK,
+       text_color: tuple[int, int, int] = TXT_COLOR,
        text_style: str = "",
        font_face: str = FONT_FACE,
        tilt: float = 0,

@@ -9,12 +9,7 @@ import webbrowser as wb
 pygame.init()
 clock = pygame.time.Clock()
 
-
-# Layouts:
-#  - main_menu
-#  - credits
-#  - in_game
-current_layout = "main_menu"
+current_layout = "credits"
 
 
 def set_layout(layout_name):
@@ -23,31 +18,66 @@ def set_layout(layout_name):
     print(current_layout)
 
 
+def BACK_BUTTON(layout_name):
+    return Button(
+        pos=(60, 30),
+        function=set_layout,
+        args=[layout_name],
+        size=(100, 40),
+        text="Back",
+        text_color=WHITE,
+        color=(37, 119, 219),
+        hovered_color=(52, 136, 237),
+        clicked_color=(70, 148, 242),
+        curve=8,
+        halo=20
+    )
+
+
+def GITHUB_BUTTON(link, pos):
+    return Button(
+        pos=pos,
+        function=wb.open,
+        args=[link],
+        size=(380, 80),
+        text="See GitHub",
+        text_offset=(0, -3),
+        color=(27, 191, 71),
+        hovered_color=(35, 217, 84),
+        clicked_color=(39, 227, 89),
+        curve=25,
+        halo=20
+    )
+
+
 def main():
     size = (0, 0)
     flags = pygame.FULLSCREEN | pygame.HWSURFACE
     screen = pygame.display.set_mode(size, flags, vsync=1)
 
     screen_centre = screen.get_width()/2, screen.get_height()/2
+    centre_x = screen.get_width()/2
+    centre_y = screen.get_height()/2
+
+    CLOSE_BUTTON = Button(
+        pos=(screen.get_width()-31, 30),
+        function=sys.exit,
+        size=(40, 40),
+        text="X",
+        text_offset=(0, -2),
+        text_style="bold",
+        text_color=(245, 208, 201),
+        color=(189, 63, 38),
+        hovered_color=(217, 92, 67),
+        clicked_color=(222, 107, 84),
+        curve=8,
+        halo=20
+    )
 
     layouts = {
     "main_menu":
         {"buttons":[
-            # Close button
-            Button(
-                pos=(screen.get_width()-31, 30),
-                function=sys.exit,
-                size=(40, 40),
-                text="X",
-                text_offset=(0, -2),
-                text_style="bold",
-                text_color=(245, 208, 201),
-                color=(189, 63, 38),
-                hovered_color=(217, 92, 67),
-                clicked_color=(222, 107, 84),
-                curve=8,
-                halo=20
-            ),
+            CLOSE_BUTTON,
 
             # Play button
             Button(
@@ -61,22 +91,22 @@ def main():
                 color=(37, 119, 219),
                 hovered_color=(52, 136, 237),
                 clicked_color=(70, 148, 242),
-                curve=25,
+                curve=30,
                 halo=20
             ),
 
             # Credits button
             Button(
-                pos=(screen_centre[0], screen_centre[1] + 190),
+                pos=(centre_x, centre_y + 190),
                 function=set_layout,
                 args=["credits"],
                 size=(400, 90),
                 text="Credits",
                 text_offset=(0, -9),
                 text_color=WHITE,
-                color=(37, 119, 219),
-                hovered_color=(52, 136, 237),
-                clicked_color=(70, 148, 242),
+                color=(27, 191, 71),
+                hovered_color=(35, 217, 84),
+                clicked_color=(39, 227, 89),
                 curve=25,
                 halo=20
             )
@@ -84,69 +114,60 @@ def main():
         ], "statics":[
             # Title
             Label(
-                pos=(screen_centre[0], screen_centre[1]-screen.get_height()/4),
+                pos=(centre_x, centre_y-screen.get_height()/4),
                 text="Game title!",
                 font_size=100,
-                text_color=WHITE,
                 tilt=15
             )
         ]},
     "credits":
         {"buttons":[
-            # Close button
-            Button(
-                pos=(screen.get_width()-31, 30),
-                function=sys.exit,
-                size=(40, 40),
-                text="X",
-                text_offset=(0, -2),
-                text_style="bold",
-                text_color=(245, 208, 201),
-                color=(189, 63, 38),
-                hovered_color=(217, 92, 67),
-                clicked_color=(222, 107, 84),
-                curve=8,
-                halo=20
+            CLOSE_BUTTON,
+            BACK_BUTTON("main_menu"),
+            GITHUB_BUTTON(
+                link="https://github.com/TheSilvered",
+                pos=(centre_x + 200, centre_y - 50)
             ),
-
-            # Back button
-            Button(
-                pos=(60, 30),
-                function=set_layout,
-                args=["main_menu"],
-                size=(100, 40),
-                text="Back",
-                text_color=WHITE,
-                color=(37, 119, 219),
-                hovered_color=(52, 136, 237),
-                clicked_color=(70, 148, 242),
-                curve=8,
-                halo=20
+            GITHUB_BUTTON(
+                link="https://github.com/eli033",
+                pos=(centre_x + 200, centre_y + 250)
             )
+
         ], "statics": [
             Label(
-                pos=screen_centre,
-                text="Hello",
-                font_size=40,
-                text_color=WHITE
+                pos=(centre_x, centre_y - 400),
+                text="This game was made by:",
+                font_size=100
+            ),
+
+            Label(
+                pos=(centre_x, centre_y - 180),
+                font_size=60,
+                text="Coding:"
+            ),
+
+            Label(
+                pos=(centre_x - 200, centre_y - 50),
+                font_size=60,
+                text="TheSilvered"
+            ),
+
+            Label(
+                pos=(centre_x, centre_y + 130),
+                font_size=60,
+                text="Graphics:"
+            ),
+
+            Label(
+                pos=(centre_x - 135, centre_y + 250),
+                font_size=60,
+                text="eli033"
             )
         ]},
     "in_game":
         {"buttons":[
-            # Back button
-            Button(
-                pos=(60, 30),
-                function=set_layout,
-                args=["main_menu"],
-                size=(100, 40),
-                text="Back",
-                text_color=WHITE,
-                color=(37, 119, 219),
-                hovered_color=(52, 136, 237),
-                clicked_color=(70, 148, 242),
-                curve=8,
-                halo=20
-            )
+            CLOSE_BUTTON,
+            BACK_BUTTON("main_menu")
         ], "statics": []}
     }
 
