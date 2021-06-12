@@ -26,7 +26,7 @@ def reset_level():
     player2.x = 1350
     player2.y = 780
 
-    if gravity < 0:
+    if player1._grav < 0:
         switch_grav()
 
 

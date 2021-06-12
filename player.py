@@ -77,6 +77,7 @@ class Player(pygame.sprite.Sprite):
         if dir_ == self._facing_dir and self._grav < 0:
             self.image = pygame.transform.flip(self.image, True, False)
             self._facing_dir = "left" if dir_ == "right" else "right"
+            
         elif dir_ != self._facing_dir and self._grav > 0:
             self.image = pygame.transform.flip(self.image, True, False)
             self._facing_dir = dir_

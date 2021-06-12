@@ -15,24 +15,20 @@ class Block(pygame.sprite.Sprite):
 
 
 class Boundary(pygame.sprite.Sprite):
-    def __init__(self, pos, dim):
+    def __init__(self, pos, dim, image):
         pygame.sprite.Sprite.__init__(self)
         self.rect = pygame.Rect(pos, dim)
-        self.image = pygame.Surface(dim)
-        self.image.fill(GREEN)
-
-    # def render(self, surface):
-    #     pygame.draw.rect(surface, GREEN, self.rect)
+        self.image = pygame.image.load(image)
 
 
 class Level:
     def __init__(self, pos, dim, res, block_placement):
         # Boundary thickness
         bt = 10
-        self._u = Boundary((pos[0]-bt    , pos[1]-bt    ), (dim[0]+bt*2, bt)    )
-        self._d = Boundary((pos[0]-bt    , pos[1]+dim[1]), (dim[0]+bt*2, bt)    )
-        self._l = Boundary((pos[0]-bt    , pos[1]       ), (bt         , dim[1]))
-        self._r = Boundary((pos[0]+dim[0], pos[1]       ), (bt         , dim[1]))
+        self._u = Boundary((pos[0]-bt    , pos[1]-bt    ), (dim[0]+bt*2, bt)    , "images/boundary_up.png")
+        self._d = Boundary((pos[0]-bt    , pos[1]+dim[1]), (dim[0]+bt*2, bt)    , "images/boundary_down.png")
+        self._l = Boundary((pos[0]-bt    , pos[1]       ), (bt         , dim[1]), "images/boundary_left.png")
+        self._r = Boundary((pos[0]+dim[0], pos[1]       ), (bt         , dim[1]), "images/boundary_right.png")
 
         self._res_jmp = (dim[0]//res[0], dim[1]//res[1])
 
@@ -100,10 +96,10 @@ levels = [
                 dim=(893, 940),
                 res=(19, 20),
                 block_placement=[
-                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1],
-                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
