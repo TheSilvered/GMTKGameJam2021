@@ -40,7 +40,13 @@ class Image(Element):
        self,
        pos: tuple[int, int],
        path: str):  # Position of the centre
-        pass
+
+        self._img = pygame.image.load(path)
+
+        super().__init__((self._img.get_width(), self._img.get_height()), pos)
+
+    def render(self, screen):
+        screen.blit(self._img, self.LU)
 
 
 class Button(Element):
@@ -57,7 +63,6 @@ class Button(Element):
        font_face: str = FONT_FACE,
        text_color: tuple[int, int, int] = TXT_COLOR,
        color: tuple[int, int, int] = BUTTON_COLOR,
-       bg_color: tuple[int, int, int] = BG_COLOR,
        hovered_color: tuple[int, int, int] = None,
        clicked_color: tuple[int, int, int] = None,
        curve: int = 0,
@@ -91,7 +96,6 @@ class Button(Element):
         self._c  = color
         self._hc = hovered_color
         self._cc = clicked_color
-        self._bg = bg_color
         
         if halo % 2: halo -= 1
         self._halo = halo
@@ -127,7 +131,7 @@ class Button(Element):
             halo = self._halo
 
         button_surface = pygame.Surface(self.size)
-        button_surface.fill(self._bg)
+        button_surface.set_colorkey((0, 0, 0))
 
         # Without the "+ 1"s the curves would not be consistent
         angle1 = (             self._curve + 1, self._curve + 1          )
