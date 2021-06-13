@@ -2,6 +2,20 @@ import pygame
 from constants import *
 
 
+def smooth_scale(surface, blit_surf, end_dim, speed, pos):
+    blit_surf.blit(surface, pos)
+    for i in range(100):
+        dim = (surface.get_width(), surface.get_height())
+        new_dim = (
+            int(dim[0] + (end_dim[0] - dim[0]) // speed),
+            int(dim[1] + (end_dim[1] - dim[1]) // speed)
+        )
+        print(new_dim)
+        surface = pygame.transform.scale(surface, new_dim)
+        blit_surf.blit(surface, pos)
+        pygame.display.update()
+
+
 class Element:
     def __init__(
        self,

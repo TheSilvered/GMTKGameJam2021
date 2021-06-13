@@ -73,6 +73,20 @@ class Player(pygame.sprite.Sprite):
 
         return 0
 
+    @property
+    def on_door(self):
+        collisions = pygame.sprite.groupcollide(
+            self.group,
+            self.level.no_coll_blocks,
+            False,
+            False
+        )
+        return len(collisions) > 0
+
+    def set_pos(self, value):
+        self.x = value[0]
+        self.y = value[1]
+
     def change_dir(self, dir_):
         if dir_ == self._facing_dir and self._grav < 0:
             self.image = pygame.transform.flip(self.image, True, False)
@@ -81,7 +95,6 @@ class Player(pygame.sprite.Sprite):
         elif dir_ != self._facing_dir and self._grav > 0:
             self.image = pygame.transform.flip(self.image, True, False)
             self._facing_dir = dir_
-        
 
     def move(self):
         if self._starting_grav < 0:
@@ -124,7 +137,10 @@ class Player(pygame.sprite.Sprite):
 
         self.y += self.y_speed
         if self.collisions > 0:
-            self.can_jump = True
+            if self.y_speed < 0 and self._grav < 0 or\
+               self.y_speed > 0 and self._grav > 0:
+                self.can_jump = True
+
             # Prevents the game from freezing
             for _ in range(100):
                 if self.collisions == 0:
@@ -136,7 +152,8 @@ class Player(pygame.sprite.Sprite):
     def render(self, surface):
         self.move()
         self.rect.update(self.pos, (self.rect.width, self.rect.height))
-        # pygame.draw.rect(surface, GREEN, self.rect)
+        if self.on_door:
+            pygame.draw.rect(surface, GREEN, self.rect)
         surface.blit(self.image, self.pos)
 
 

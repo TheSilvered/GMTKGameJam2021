@@ -21,10 +21,12 @@ def set_layout(layout_name):
 
 
 def reset_level():
-    player1.x = 550
-    player1.y = 974
-    player2.x = 1350
-    player2.y = 780
+    player1.set_pos(levels[current_level][0].player_pos)
+    player2.set_pos(levels[current_level][1].player_pos)
+    player1.x_speed = 0
+    player1.y_speed = 0
+    player2.x_speed = 0
+    player2.y_speed = 0    
 
     if player1._grav < 0:
         switch_grav()
@@ -38,21 +40,21 @@ def BACK_BUTTON(layout_name):
         size=(150, 40),
         text="◄ Back",
         text_offset=(-5, -2),
-        color=(37, 119, 219),
-        hovered_color=(52, 136, 237),
-        clicked_color=(70, 148, 242),
+        color=(59, 73, 227),
+        hovered_color=(90, 102, 232),
+        clicked_color=(125, 135, 245),
         curve=8,
         halo=30
     )
 
 
-def GITHUB_BUTTON(link, pos):
+def LINK_BUTTON(link, pos, txt):
     return Button(
         pos=pos,
         function=wb.open,
         args=[link],
         size=(380, 80),
-        text="See GitHub",
+        text=txt,
         text_offset=(0, -3),
         color=(27, 191, 71),
         hovered_color=(35, 217, 84),
@@ -70,6 +72,8 @@ def main():
     screen_centre = screen.get_width()/2, screen.get_height()/2
     centre_x = screen.get_width()/2
     centre_y = screen.get_height()/2
+
+    level_win = False
 
     CLOSE_BUTTON = Button(
         pos=(screen.get_width()-31, 30),
@@ -99,9 +103,9 @@ def main():
                 size=(500, 100),
                 text="Play",
                 text_offset=(0, -9),
-                color=(37, 119, 219),
-                hovered_color=(52, 136, 237),
-                clicked_color=(70, 148, 242),
+                color=(59, 73, 227),
+                hovered_color=(90, 102, 232),
+                clicked_color=(125, 135, 245),
                 curve=30,
                 halo=30
             ),
@@ -130,7 +134,7 @@ def main():
             # Title
             Label(
                 pos=(centre_x, centre_y-screen.get_height()/4),
-                text="Game title!",
+                text="Astronauts!",
                 font_size=100,
                 tilt=15
             )
@@ -139,13 +143,33 @@ def main():
         {"buttons":[
             CLOSE_BUTTON,
             BACK_BUTTON("main_menu"),
-            GITHUB_BUTTON(
-                link="https://github.com/TheSilvered",
-                pos=(centre_x + 200, centre_y - 50)
+
+            Button(
+                pos=(centre_x + 220, centre_y + 100),
+                function=wb.open,
+                args=["https://github.com/TheSilvered"],
+                size=(380, 80),
+                text="GitHub",
+                text_offset=(0, -3),
+                color=(27, 191, 71),
+                hovered_color=(35, 217, 84),
+                clicked_color=(39, 227, 89),
+                curve=25,
+                halo=30
             ),
-            GITHUB_BUTTON(
-                link="https://github.com/eli033",
-                pos=(centre_x + 200, centre_y + 250)
+
+            Button(
+                pos=(centre_x - 220, centre_y + 100),
+                function=wb.open,
+                args=["https://thesilvered.itch.io/"],
+                size=(380, 80),
+                text="itch.io",
+                text_offset=(0, -3),
+                color=(245, 17, 66),
+                hovered_color=(245, 54, 95),
+                clicked_color=(232, 107, 134),
+                curve=25,
+                halo=30
             )
 
         ], "statics": [
@@ -161,28 +185,11 @@ def main():
             ),
 
             Label(
-                pos=(centre_x, centre_y - 180),
-                font_size=60,
-                text="Coding:"
-            ),
-
-            Label(
-                pos=(centre_x - 200, centre_y - 50),
+                pos=(centre_x, centre_y - 50),
                 font_size=60,
                 text="TheSilvered"
-            ),
-
-            Label(
-                pos=(centre_x, centre_y + 130),
-                font_size=60,
-                text="Graphics:"
-            ),
-
-            Label(
-                pos=(centre_x - 135, centre_y + 250),
-                font_size=60,
-                text="eli033"
             )
+
         ]},
     "in_game":
         {"buttons":[
@@ -207,12 +214,12 @@ def main():
             Button(
                 pos=(centre_x+500, 35),
                 function=reset_level,
-                size=(200, 50),
+                size=(120, 50),
                 text="Reset",
                 text_offset=(0, -4),
-                color=(59, 73, 227),
-                hovered_color=(90, 102, 232),
-                clicked_color=(125, 135, 245),
+                color=(240, 0, 0),
+                hovered_color=(255, 69, 69),
+                clicked_color=(245, 115, 115),
                 curve=9,
                 halo=30
             )
@@ -223,12 +230,33 @@ def main():
                 pos=screen_centre,
                 path="images/bg.png"
             )
+        ]},
+    "win_screen":
+        {"buttons": [
+            CLOSE_BUTTON,
+            BACK_BUTTON("main_menu")
+
+        ], "statics": [
+            # Background
+            Image(
+                pos=screen_centre,
+                path="images/bg.png"
+            ),
+            Label(
+                pos=screen_centre,
+                text="Contratulations, you won!",
+                font_size=30
+            )
         ]}
     }
 
+    # next_level_button = Button(
+    #     pos=
+    # )
+
 
     while True:
-        t = clock.tick()
+        clock.tick(60)
 
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
@@ -241,8 +269,10 @@ def main():
                         i.execute()
 
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_p:
-                    print(player1.pos)
+                if event.key == pygame.K_h:
+                    s = pygame.image.load("images/1.png")
+                    smooth_scale(s, screen, (1000, 1000), 10, screen_centre)
+
 
         # Resets display
         screen.fill(BG_COLOR)
@@ -254,10 +284,21 @@ def main():
         
             i.render(screen)
         if current_layout == "in_game":
-            levels[current_level][0].render(screen)
-            levels[current_level][1].render(screen)
-            player1.render(screen)
-            player2.render(screen)
+            try:
+                levels[current_level][0].render(screen)
+                levels[current_level][1].render(screen)
+                player1.render(screen)
+                player2.render(screen)
+            
+            except IndexError:
+                set_layout("win_screen")
+
+            if player1.on_door and player2.on_door or level_win:
+                bg = Image(screen_centre, "images/next_level_bg.png")
+                bg.render(screen)
+                level_win = True
+                reset_level()
+
 
         pygame.display.update()
 
