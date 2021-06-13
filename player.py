@@ -152,8 +152,6 @@ class Player(pygame.sprite.Sprite):
     def render(self, surface):
         self.move()
         self.rect.update(self.pos, (self.rect.width, self.rect.height))
-        if self.on_door:
-            pygame.draw.rect(surface, GREEN, self.rect)
         surface.blit(self.image, self.pos)
 
 

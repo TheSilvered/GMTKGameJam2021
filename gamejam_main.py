@@ -5,7 +5,8 @@ import webbrowser as wb
 from element import *
 from level import *
 from player import *
-from global_variables import *
+import global_variables
+import reset_level
 # print(dir(pygame))
 
 # Initializing pygame
@@ -18,18 +19,10 @@ current_layout = "main_menu"
 def set_layout(layout_name):
     global current_layout
     current_layout = layout_name
-
-
-def reset_level():
-    player1.set_pos(levels[current_level][0].player_pos)
-    player2.set_pos(levels[current_level][1].player_pos)
-    player1.x_speed = 0
-    player1.y_speed = 0
-    player2.x_speed = 0
-    player2.y_speed = 0    
-
-    if player1._grav < 0:
-        switch_grav()
+    if layout_name == "in_game":
+        global_variables.current_level = 0
+        global_variables.level_win = False
+        reset_level.reset_level()
 
 
 def BACK_BUTTON(layout_name):
@@ -72,8 +65,6 @@ def main():
     screen_centre = screen.get_width()/2, screen.get_height()/2
     centre_x = screen.get_width()/2
     centre_y = screen.get_height()/2
-
-    level_win = False
 
     CLOSE_BUTTON = Button(
         pos=(screen.get_width()-31, 30),
@@ -185,8 +176,8 @@ def main():
             ),
 
             Label(
-                pos=(centre_x, centre_y - 50),
-                font_size=60,
+                pos=(centre_x, centre_y - 60),
+                font_size=70,
                 text="TheSilvered"
             )
 
@@ -199,7 +190,7 @@ def main():
             # Switch for gravity
             Button(
                 pos=(centre_x, 35),
-                function=switch_grav,
+                function=global_variables.switch_grav,
                 size=(300, 50),
                 text="Switch gravity",
                 text_offset=(0, -4),
@@ -213,7 +204,7 @@ def main():
             # Reset button
             Button(
                 pos=(centre_x+500, 35),
-                function=reset_level,
+                function=reset_level.reset_level,
                 size=(120, 50),
                 text="Reset",
                 text_offset=(0, -4),
@@ -245,14 +236,24 @@ def main():
             Label(
                 pos=screen_centre,
                 text="Contratulations, you won!",
-                font_size=30
+                font_size=100,
+                font_face="segoeuibold"
             )
         ]}
     }
 
-    # next_level_button = Button(
-    #     pos=
-    # )
+    next_level_button = Button(
+        pos=screen_centre,
+        function=reset_level.next_level,
+        size=(400, 100),
+        text="Next level",
+        text_offset=(0, -9),
+        color=(59, 73, 227),
+        hovered_color=(90, 102, 232),
+        clicked_color=(125, 135, 245),
+        curve=30,
+        halo=30
+    )
 
 
     while True:
@@ -267,6 +268,8 @@ def main():
                 for i in layouts[current_layout]["buttons"]:
                     if i.clicked:
                         i.execute()
+                if global_variables.level_win and next_level_button.clicked:
+                    next_level_button.execute()
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_h:
@@ -285,19 +288,27 @@ def main():
             i.render(screen)
         if current_layout == "in_game":
             try:
-                levels[current_level][0].render(screen)
-                levels[current_level][1].render(screen)
-                player1.render(screen)
-                player2.render(screen)
+                levels[global_variables.current_level][0].render(screen)
+                levels[global_variables.current_level][1].render(screen)
             
             except IndexError:
                 set_layout("win_screen")
 
-            if player1.on_door and player2.on_door or level_win:
+            if player1.on_door and player2.on_door:
+                global_variables.level_win = True
+            else:
+                global_variables.level_win = False
+
+            if global_variables.level_win:
                 bg = Image(screen_centre, "images/next_level_bg.png")
                 bg.render(screen)
-                level_win = True
-                reset_level()
+                next_level_button.render(screen)
+                global_variables.level_win = True
+
+            else:
+                player1.render(screen)
+                player2.render(screen)
+
 
 
         pygame.display.update()
