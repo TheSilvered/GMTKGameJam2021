@@ -10,9 +10,11 @@ def reset_level():
         player1.x_speed = 0
         player1.y_speed = 0
         player2.x_speed = 0
-        player2.y_speed = 0    
+        player2.y_speed = 0
+        player1.level = levels[global_variables.current_level][0]
+        player2.level = levels[global_variables.current_level][1]
 
-        if player1._grav < 0:
+        if global_variables.gravity < 0:
             global_variables.switch_grav()
 
     except IndexError:

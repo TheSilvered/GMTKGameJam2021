@@ -1,5 +1,8 @@
 import pygame
 from constants import *
+pygame.init()
+
+click = pygame.mixer.Sound("sounds/click.wav")
 
 
 def smooth_scale(surface, blit_surf, end_dim, speed, pos):
@@ -79,6 +82,7 @@ class Button(Element):
        color: tuple[int, int, int] = BUTTON_COLOR,
        hovered_color: tuple[int, int, int] = None,
        clicked_color: tuple[int, int, int] = None,
+       sound: pygame.mixer.Sound = click,
        curve: int = 0,
        halo: int = 0,  # Is automatically set to be even
        visible: bool = True):
@@ -111,6 +115,8 @@ class Button(Element):
         self._hc = hovered_color
         self._cc = clicked_color
         
+        self._sound = sound
+
         if halo % 2: halo -= 1
         self._halo = halo
         self._curve = curve
@@ -196,6 +202,8 @@ class Button(Element):
     def execute(self):
         if not self.visible:
             return
+
+        pygame.mixer.Sound.play(self._sound)
 
         self.func(*self._args, **self._kwargs)
 

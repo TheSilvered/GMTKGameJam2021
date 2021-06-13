@@ -14,6 +14,14 @@ pygame.init()
 clock = pygame.time.Clock()
 
 current_layout = "main_menu"
+music = pygame.mixer.music.load("sounds/music.mp3")
+pygame.mixer.music.set_volume(0.5)
+
+
+def close():
+    pygame.mixer.music.fadeout(300)
+    sleep(0.3)
+    sys.exit()
 
 
 def set_layout(layout_name):
@@ -62,13 +70,15 @@ def main():
     flags = pygame.FULLSCREEN | pygame.HWSURFACE
     screen = pygame.display.set_mode(size, flags, vsync=1)
 
+    pygame.mixer.music.play(-1)
+
     screen_centre = screen.get_width()/2, screen.get_height()/2
     centre_x = screen.get_width()/2
     centre_y = screen.get_height()/2
 
     CLOSE_BUTTON = Button(
         pos=(screen.get_width()-31, 30),
-        function=sys.exit,
+        function=close,
         size=(40, 40),
         text="X",
         text_offset=(0, -2),
@@ -136,7 +146,7 @@ def main():
             BACK_BUTTON("main_menu"),
 
             Button(
-                pos=(centre_x + 220, centre_y + 100),
+                pos=(centre_x + 220, centre_y),
                 function=wb.open,
                 args=["https://github.com/TheSilvered"],
                 size=(380, 80),
@@ -150,7 +160,7 @@ def main():
             ),
 
             Button(
-                pos=(centre_x - 220, centre_y + 100),
+                pos=(centre_x - 220, centre_y),
                 function=wb.open,
                 args=["https://thesilvered.itch.io/"],
                 size=(380, 80),
@@ -176,9 +186,21 @@ def main():
             ),
 
             Label(
-                pos=(centre_x, centre_y - 60),
-                font_size=70,
+                pos=(centre_x, centre_y - 150),
+                font_size=65,
                 text="TheSilvered"
+            ),
+
+            Label(
+                pos=(centre_x, centre_y + 220),
+                font_size=80,
+                text="Music by:"
+            ),
+
+            Label(
+                pos=(centre_x, centre_y + 350),
+                font_size=65,
+                text="sscheidl"
             )
 
         ]},
@@ -191,12 +213,13 @@ def main():
             Button(
                 pos=(centre_x, 35),
                 function=global_variables.switch_grav,
-                size=(300, 50),
-                text="Switch gravity",
+                size=(310, 50),
+                text="Switch gravity (G)",
                 text_offset=(0, -4),
                 color=(59, 73, 227),
                 hovered_color=(90, 102, 232),
                 clicked_color=(125, 135, 245),
+                sound=pygame.mixer.Sound("sounds/grav.wav"),
                 curve=9,
                 halo=30
             ),
@@ -205,8 +228,8 @@ def main():
             Button(
                 pos=(centre_x+500, 35),
                 function=reset_level.reset_level,
-                size=(120, 50),
-                text="Reset",
+                size=(160, 50),
+                text="Reset (R)",
                 text_offset=(0, -4),
                 color=(240, 0, 0),
                 hovered_color=(255, 69, 69),
@@ -272,9 +295,10 @@ def main():
                     next_level_button.execute()
 
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_h:
-                    s = pygame.image.load("images/1.png")
-                    smooth_scale(s, screen, (1000, 1000), 10, screen_centre)
+                if event.key == pygame.K_g:
+                    global_variables.switch_grav()
+                elif event.key == pygame.K_r:
+                    reset_level.reset_level()
 
 
         # Resets display

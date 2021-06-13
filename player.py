@@ -5,6 +5,8 @@ import global_variables
 from level import levels
 
 pygame.init()
+jump = pygame.mixer.Sound("sounds/jump.wav")
+jump.set_volume(0.2)
 
 
 class Player(pygame.sprite.Sprite):
@@ -107,12 +109,12 @@ class Player(pygame.sprite.Sprite):
         self._prev_grav = self._grav
 
         keys = pygame.key.get_pressed()
-        if keys[pygame.K_d] and keys[pygame.K_a]:
+        if (keys[pygame.K_d] or keys[pygame.K_RIGHT]) and (keys[pygame.K_a] or keys[pygame.K_LEFT]):
             self.x_speed = 0
-        elif keys[pygame.K_d]:
+        elif keys[pygame.K_d] or keys[pygame.K_RIGHT]:
             self.x_speed = SPEED * self._grav
             self.change_dir("right")
-        elif keys[pygame.K_a]:
+        elif keys[pygame.K_a] or keys[pygame.K_LEFT]:
             self.x_speed = -SPEED * self._grav
             self.change_dir("left")
         else:
@@ -120,9 +122,10 @@ class Player(pygame.sprite.Sprite):
 
         self.y_speed += self._grav
 
-        if keys[pygame.K_SPACE] and self.can_jump:
+        if (keys[pygame.K_SPACE] or keys[pygame.K_UP] or keys[pygame.K_w]) and self.can_jump:
             self.y_speed = -20 * self._grav / 1.3
             self.can_jump = False
+            pygame.mixer.Sound.play(jump)
 
         self.x += self.x_speed
         if self.collisions > 0:
