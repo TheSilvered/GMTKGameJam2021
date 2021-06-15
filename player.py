@@ -22,9 +22,11 @@ class Player(pygame.sprite.Sprite):
 
         self.image = pygame.image.load(base_image)
         self.image = pygame.transform.scale(self.image, scale)
+        self._anim = [pygame.transform.scale(pygame.image.load(i), scale) for i in animation_images]
         if inv_grav:
             self.image = pygame.transform.flip(self.image, False, True)
-        self._anim = [pygame.image.load(i) for i in animation_images]
+            for i in range(len(self._anim)):
+                self._anim[i] = pygame.transform.flip(self._anim[i], False, True)
 
         self._facing_dir = "right"
 
@@ -40,6 +42,7 @@ class Player(pygame.sprite.Sprite):
         self.level = level
 
         self.can_jump = True
+        self._tick_count = 0
 
     @property
     def x(self):
@@ -79,7 +82,7 @@ class Player(pygame.sprite.Sprite):
     def on_door(self):
         collisions = pygame.sprite.groupcollide(
             self.group,
-            self.level.no_coll_blocks,
+            self.level.door,
             False,
             False
         )
@@ -92,10 +95,14 @@ class Player(pygame.sprite.Sprite):
     def change_dir(self, dir_):
         if dir_ == self._facing_dir and self._grav < 0:
             self.image = pygame.transform.flip(self.image, True, False)
+            for i in range(len(self._anim)):
+                self._anim[i] = pygame.transform.flip(self._anim[i], True, False)
             self._facing_dir = "left" if dir_ == "right" else "right"
             
         elif dir_ != self._facing_dir and self._grav > 0:
             self.image = pygame.transform.flip(self.image, True, False)
+            for i in range(len(self._anim)):
+                self._anim[i] = pygame.transform.flip(self._anim[i], True, False)
             self._facing_dir = dir_
 
     def move(self):
@@ -106,6 +113,8 @@ class Player(pygame.sprite.Sprite):
 
         if self._prev_grav != self._grav:
             self.image = pygame.transform.flip(self.image, False, True)
+            for i in range(len(self._anim)):
+                self._anim[i] = pygame.transform.flip(self._anim[i], False, True)
         self._prev_grav = self._grav
 
         keys = pygame.key.get_pressed()
@@ -130,7 +139,7 @@ class Player(pygame.sprite.Sprite):
         self.x += self.x_speed
         if self.collisions > 0:
             # Prevents the game from freezing
-            for _ in range(100):
+            for _ in range(1000):
                 if self.collisions == 0:
                     break
                 self.x += self.x_speed * -.1
@@ -145,7 +154,7 @@ class Player(pygame.sprite.Sprite):
                 self.can_jump = True
 
             # Prevents the game from freezing
-            for _ in range(100):
+            for _ in range(1000):
                 if self.collisions == 0:
                     break
                 self.y += self.y_speed * -.1
@@ -155,12 +164,29 @@ class Player(pygame.sprite.Sprite):
     def render(self, surface):
         self.move()
         self.rect.update(self.pos, (self.rect.width, self.rect.height))
-        surface.blit(self.image, self.pos)
+        self._tick_count += 1
+        if self._tick_count >= FRAMERATE:
+            self._tick_count = 0
+
+        if (0.5 < self.x_speed or -0.5 > self.x_speed) and self.can_jump:
+            try:
+                surface.blit(self._anim[self._tick_count // (FRAMERATE//len(self._anim))], self.pos)
+            except IndexError:
+                surface.blit(self._anim[(self._tick_count // (FRAMERATE//len(self._anim))) - 1], self.pos)
+
+            self._tick_count += 1
+            if self._tick_count >= FRAMERATE:
+                self._tick_count = 0
+
+        else:
+            surface.blit(self.image, self.pos)
+            self._tick_count = 0
 
 
 player1 = Player(
         base_image="images/astronaut.png",
-        animation_images=[],
+        animation_images=["images/walk_1.png", "images/walk_2.png", "images/walk_1.png", "images/walk_2.png",
+                          "images/walk_1.png", "images/walk_2.png", "images/walk_1.png", "images/walk_2.png"],
         hitbox="auto",
         pos=(550, 974),
         scale=(38, 44),
@@ -170,7 +196,8 @@ player1 = Player(
 
 player2 = Player(
         base_image="images/astronaut.png",
-        animation_images=[],
+        animation_images=["images/walk_1.png", "images/walk_2.png", "images/walk_1.png", "images/walk_2.png",
+                          "images/walk_1.png", "images/walk_2.png", "images/walk_1.png", "images/walk_2.png"],
         hitbox="auto",
         pos=(1350, 780),
         scale=(38, 44),

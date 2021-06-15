@@ -16,3 +16,5 @@ FONT_FACE = "segoeui"
 
 SPEED = 8
 DECELERATION = 1.5
+
+FRAMERATE = 60
