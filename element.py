@@ -70,6 +70,7 @@ class Button(Element):
     def __init__(
        self,
        pos: tuple[int, int],  # Position of the centre
+       window_scale: tuple[int, int],
        function: str,
        size: tuple[int, int],
        args: list = None,
@@ -86,6 +87,10 @@ class Button(Element):
        curve: int = 0,
        halo: int = 0,  # Is automatically set to be even
        visible: bool = True):
+
+        self._wscale = window_scale
+        self._wscalex = self._wscale[0]
+        self._wscaley = self._wscale[1]
 
         if args is None:
             args = []
@@ -128,8 +133,8 @@ class Button(Element):
 
     @property
     def hovered(self):
-        mousex = pygame.mouse.get_pos()[0]
-        mousey = pygame.mouse.get_pos()[1]
+        mousex = (pygame.mouse.get_pos()[0] * 1920) / self._wscalex
+        mousey = (pygame.mouse.get_pos()[1] * 1080) / self._wscaley
 
         return self.L < mousex < self.R and self.U < mousey < self.D
 

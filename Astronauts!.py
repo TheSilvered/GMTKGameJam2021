@@ -33,38 +33,6 @@ def set_layout(layout_name):
         reset_level.reset_level()
 
 
-def BACK_BUTTON(layout_name):
-    return Button(
-        pos=(85, 30),
-        function=set_layout,
-        args=[layout_name],
-        size=(150, 40),
-        text="◄ Back",
-        text_offset=(-5, -2),
-        color=(59, 73, 227),
-        hovered_color=(90, 102, 232),
-        clicked_color=(125, 135, 245),
-        curve=8,
-        halo=30
-    )
-
-
-def LINK_BUTTON(link, pos, txt):
-    return Button(
-        pos=pos,
-        function=wb.open,
-        args=[link],
-        size=(380, 80),
-        text=txt,
-        text_offset=(0, -3),
-        color=(27, 191, 71),
-        hovered_color=(35, 217, 84),
-        clicked_color=(39, 227, 89),
-        curve=25,
-        halo=30
-    )
-
-
 def main():
     size = (0, 0)
     flags = pygame.FULLSCREEN | pygame.HWSURFACE
@@ -72,7 +40,9 @@ def main():
 
     screen1080p = pygame.Surface((1920, 1080))
 
+    icon = pygame.image.load("images/icon.png")
     pygame.display.set_caption("Astronauts!")
+    pygame.display.set_icon(icon)
      
     pygame.mixer.music.play(-1)
 
@@ -80,8 +50,13 @@ def main():
     centre_x = screen1080p.get_width()/2
     centre_y = screen1080p.get_height()/2
 
+    scale_width = screen.get_width()
+    scale_height = int(1080 * (screen.get_width()/1920))
+    scale = (scale_width, scale_height)
+
     CLOSE_BUTTON = Button(
         pos=(screen1080p.get_width()-31, 30),
+        window_scale=scale,
         function=close,
         size=(40, 40),
         text="X",
@@ -95,6 +70,38 @@ def main():
         halo=30
     )
 
+    def BACK_BUTTON(layout_name):
+        return Button(
+            pos=(85, 30),
+            window_scale=scale,
+            function=set_layout,
+            args=[layout_name],
+            size=(150, 40),
+            text="◄ Back",
+            text_offset=(-5, -2),
+            color=(59, 73, 227),
+            hovered_color=(90, 102, 232),
+            clicked_color=(125, 135, 245),
+            curve=8,
+            halo=30
+        )
+
+    def LINK_BUTTON(link, pos, txt):
+        return Button(
+            pos=pos,
+            window_scale=scale,
+            function=wb.open,
+            args=[link],
+            size=(380, 80),
+            text=txt,
+            text_offset=(0, -3),
+            color=(27, 191, 71),
+            hovered_color=(35, 217, 84),
+            clicked_color=(39, 227, 89),
+            curve=25,
+            halo=30
+        )
+
     layouts = {
     "main_menu":
         {"buttons":[
@@ -103,6 +110,7 @@ def main():
             # Play button
             Button(
                 pos=(centre_x, centre_y - 60),
+                window_scale=scale,
                 function=set_layout,
                 args=["in_game"],
                 size=(500, 100),
@@ -118,6 +126,7 @@ def main():
             # Credits button
             Button(
                 pos=(centre_x, centre_y + 130),
+                window_scale=scale,
                 function=set_layout,
                 args=["credits"],
                 size=(400, 90),
@@ -167,6 +176,7 @@ def main():
 
             Button(
                 pos=(centre_x + 220, centre_y),
+                window_scale=scale,
                 function=wb.open,
                 args=["https://github.com/TheSilvered"],
                 size=(380, 80),
@@ -181,6 +191,7 @@ def main():
 
             Button(
                 pos=(centre_x - 220, centre_y),
+                window_scale=scale,
                 function=wb.open,
                 args=["https://thesilvered.itch.io/"],
                 size=(380, 80),
@@ -232,6 +243,7 @@ def main():
             # Switch for gravity
             Button(
                 pos=(centre_x, 35),
+                window_scale=scale,
                 function=global_variables.switch_grav,
                 size=(310, 50),
                 text="Switch gravity (G)",
@@ -247,6 +259,7 @@ def main():
             # Reset button
             Button(
                 pos=(centre_x+500, 35),
+                window_scale=scale,
                 function=reset_level.reset_level,
                 size=(160, 50),
                 text="Reset (R)",
@@ -286,6 +299,7 @@ def main():
 
     next_level_button = Button(
         pos=screen_centre,
+        window_scale=scale,
         function=reset_level.next_level,
         size=(400, 100),
         text="Next level",
@@ -302,6 +316,11 @@ def main():
         clock.tick()
 
         for event in pygame.event.get():
+            
+            # Even in fullscreen, this might appen
+            # Ex. when you right click on the icon on the taskbar
+            if event.type == pygame.QUIT:
+                close()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     close()
@@ -330,8 +349,8 @@ def main():
             i.render(screen1080p)
 
         for i in layouts[current_layout]["buttons"]:
-        
             i.render(screen1080p)
+
         if current_layout == "in_game":
             try:
                 levels[global_variables.current_level][0].render(screen1080p)
@@ -370,9 +389,7 @@ def main():
                 info_label_l1.render(screen1080p)
                 info_label_l2.render(screen1080p)
 
-        scale_width = screen.get_width()
-        scale_height = int(1080 * (screen.get_width()/1920))
-        screen_adapted = pygame.transform.scale(screen1080p, (scale_width, scale_height))
+        screen_adapted = pygame.transform.scale(screen1080p, scale)
         screen.blit(screen_adapted, (0, 0))
         pygame.display.update()
 
