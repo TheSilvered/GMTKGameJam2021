@@ -1,8 +1,9 @@
+import gameassets as ga
+
 import pygame
 import sys
 from time import sleep
 import webbrowser as wb
-from element import *
 from level import *
 from player import *
 import global_variables
@@ -16,6 +17,8 @@ clock = pygame.time.Clock()
 current_layout = "main_menu"
 music = pygame.mixer.music.load("sounds/music.mp3")
 pygame.mixer.music.set_volume(0.5)
+click = pygame.mixer.Sound("sounds/click.wav")
+grav = pygame.mixer.Sound("sounds/grav.wav")
 
 
 def close():
@@ -54,53 +57,54 @@ def main():
     scale_height = int(1080 * (screen.get_width()/1920))
     scale = (scale_width, scale_height)
 
-    CLOSE_BUTTON = Button(
-        pos=(screen1080p.get_width()-31, 30),
+    BACKGROUND = ga.Element(
+        c_pos=screen_centre,
+        size=(1920, 1080),
+        texture=pygame.image.load("images/bg.png")
+    )
+    BACKGROUND._texture = BACKGROUND._texture.convert()  # Optimizes blitting
+
+    CLOSE_BUTTON = ga.Button(
+        c_pos=(1890, 30),
+        size=(40, 40),
+        text_kwargs= {
+            "text": "X",
+            "text_style": "bold",
+            "color": WHITE,
+            "text_size": 30,
+            "offset": (0, -2)
+        },
+        color_normal=(240, 0, 0),
+        color_hovered=(255, 69, 69),
+        color_clicked=(245, 115, 115),
+        curve=8,
+        halo=30,
+        sound=click,
         window_scale=scale,
         function=close,
-        size=(40, 40),
-        text="X",
-        text_offset=(0, -2),
-        text_style="bold",
-        text_color=WHITE,
-        color=(240, 0, 0),
-        hovered_color=(255, 69, 69),
-        clicked_color=(245, 115, 115),
-        curve=8,
-        halo=30
     )
 
     def BACK_BUTTON(layout_name):
-        return Button(
-            pos=(85, 30),
+        return ga.Button(
+            c_pos=(85, 30),
+            size=(150, 40),
+            text_kwargs={
+                "text": "Back",
+                "text_size": 32,
+                "color": WHITE,
+                "offset": (0, -2)
+            },
+            color_normal=(59, 73, 227),
+            color_hovered=(90, 102, 232),
+            color_clicked=(125, 135, 245),
+            curve=8,
+            halo=30,
+            sound=click,
             window_scale=scale,
             function=set_layout,
-            args=[layout_name],
-            size=(150, 40),
-            text="◄ Back",
-            text_offset=(-5, -2),
-            color=(59, 73, 227),
-            hovered_color=(90, 102, 232),
-            clicked_color=(125, 135, 245),
-            curve=8,
-            halo=30
+            args=[layout_name]
         )
 
-    def LINK_BUTTON(link, pos, txt):
-        return Button(
-            pos=pos,
-            window_scale=scale,
-            function=wb.open,
-            args=[link],
-            size=(380, 80),
-            text=txt,
-            text_offset=(0, -3),
-            color=(27, 191, 71),
-            hovered_color=(35, 217, 84),
-            clicked_color=(39, 227, 89),
-            curve=25,
-            halo=30
-        )
 
     layouts = {
     "main_menu":
@@ -108,65 +112,74 @@ def main():
             CLOSE_BUTTON,
 
             # Play button
-            Button(
-                pos=(centre_x, centre_y - 60),
+            ga.Button(
+                c_pos=(centre_x, centre_y - 60),
+                size=(500, 100),
+                text_kwargs={
+                    "text": "Play",
+                    "text_size": 75,
+                    "color": WHITE,
+                    "offset": (0, -9)
+                },
+                color_normal=(59, 73, 227),
+                color_hovered=(90, 102, 232),
+                color_clicked=(125, 135, 245),
+                curve=30,
+                halo=30,
+                sound=click,
                 window_scale=scale,
                 function=set_layout,
                 args=["in_game"],
-                size=(500, 100),
-                text="Play",
-                text_offset=(0, -9),
-                color=(59, 73, 227),
-                hovered_color=(90, 102, 232),
-                clicked_color=(125, 135, 245),
-                curve=30,
-                halo=30
             ),
 
             # Credits button
-            Button(
-                pos=(centre_x, centre_y + 130),
+            ga.Button(
+                c_pos=(centre_x, centre_y + 130),
+                size=(400, 90),
+                text_kwargs={
+                    "text": "Credits",
+                    "text_size": 68,
+                    "color": WHITE,
+                    "offset": (0, -5)
+                },
+                color_normal=(27, 191, 71),
+                color_hovered=(35, 217, 84),
+                color_clicked=(39, 227, 89),
+                curve=25,
+                halo=30,
+                sound=click,
                 window_scale=scale,
                 function=set_layout,
-                args=["credits"],
-                size=(400, 90),
-                text="Credits",
-                text_offset=(0, -9),
-                color=(27, 191, 71),
-                hovered_color=(35, 217, 84),
-                clicked_color=(39, 227, 89),
-                curve=25,
-                halo=30
+                args=["credits"]
             )
 
         ], "statics":[
-            # Background
-            Image(
-                pos=screen_centre,
-                path="images/bg.png"
-            ),
             # Title
-            Label(
-                pos=(centre_x, centre_y-320),
+            ga.Label(
+                c_pos=(centre_x, centre_y-320),
                 text="Astronauts!",
-                font_size=150,
+                text_size=150,
+                color=WHITE,
                 tilt=15
             ),
 
-            Label(
-                pos=(centre_x, centre_y + 360),
+            ga.Label(
+                c_pos=(centre_x, centre_y + 360),
                 text="Use WASD or the arrow keys to move",
-                font_size=50
+                text_size=50,
+                color=WHITE
             ),
-            Label(
-                pos=(centre_x, centre_y + 420),
+            ga.Label(
+                c_pos=(centre_x, centre_y + 420),
                 text="Use G or press the button to switch the gravity",
-                font_size=50
+                text_size=50,
+                color=WHITE
             ),
-            Label(
-                pos=(centre_x, centre_y + 480),
+            ga.Label(
+                c_pos=(centre_x, centre_y + 480),
                 text="Use R or press the button to reset the level",
-                font_size=50
+                text_size=50,
+                color=WHITE
             )
         ]},
     "credits":
@@ -174,64 +187,73 @@ def main():
             CLOSE_BUTTON,
             BACK_BUTTON("main_menu"),
 
-            Button(
-                pos=(centre_x + 220, centre_y),
+            ga.Button(
+                c_pos=(centre_x + 220, centre_y),
+                size=(380, 80),
+                text_kwargs={
+                    "text": "GitHub",
+                    "text_size": 60,
+                    "color": WHITE,
+                    "offset": (0, -3)
+                },
+                color_normal=(27, 191, 71),
+                color_hovered=(35, 217, 84),
+                color_clicked=(39, 227, 89),
+                curve=25,
+                halo=30,
+                sound=click,
                 window_scale=scale,
                 function=wb.open,
-                args=["https://github.com/TheSilvered"],
-                size=(380, 80),
-                text="GitHub",
-                text_offset=(0, -3),
-                color=(27, 191, 71),
-                hovered_color=(35, 217, 84),
-                clicked_color=(39, 227, 89),
-                curve=25,
-                halo=30
+                args=["https://github.com/TheSilvered"]
             ),
 
-            Button(
-                pos=(centre_x - 220, centre_y),
+            ga.Button(
+                c_pos=(centre_x - 220, centre_y),
+                size=(380, 80),
+                text_kwargs={
+                    "text": "itch.io",
+                    "text_size": 60,
+                    "color": WHITE,
+                    "offset": (0, -3)
+                },
+                color_normal=(245, 17, 66),
+                color_hovered=(245, 54, 95),
+                color_clicked=(232, 107, 134),
+                curve=25,
+                halo=30,
+                sound=click,
                 window_scale=scale,
                 function=wb.open,
-                args=["https://thesilvered.itch.io/"],
-                size=(380, 80),
-                text="itch.io",
-                text_offset=(0, -3),
-                color=(245, 17, 66),
-                hovered_color=(245, 54, 95),
-                clicked_color=(232, 107, 134),
-                curve=25,
-                halo=30
+                args=["https://thesilvered.itch.io/"]
             )
 
         ], "statics": [
-            # Background
-            Image(
-                pos=screen_centre,
-                path="images/bg.png"
-            ),
-            Label(
-                pos=(centre_x, centre_y - screen1080p.get_height()//2.7),
+            ga.Label(
+                c_pos=(centre_x, centre_y - screen1080p.get_height()//2.7),
                 text="This game was made by:",
-                font_size=100
+                text_size=100,
+                color=WHITE
             ),
 
-            Label(
-                pos=(centre_x, centre_y - 150),
-                font_size=65,
-                text="TheSilvered"
+            ga.Label(
+                c_pos=(centre_x, centre_y - 150),
+                text="TheSilvered",
+                text_size=65,
+                color=WHITE
             ),
 
-            Label(
-                pos=(centre_x, centre_y + 220),
-                font_size=80,
-                text="Music by:"
+            ga.Label(
+                c_pos=(centre_x, centre_y + 220),
+                text="Music by:",
+                text_size=80,
+                color=WHITE
             ),
 
-            Label(
-                pos=(centre_x, centre_y + 350),
-                font_size=65,
-                text="sscheidl"
+            ga.Label(
+                c_pos=(centre_x, centre_y + 350),
+                text="sscheidl",
+                text_size=65,
+                color=WHITE
             )
 
         ]},
@@ -241,79 +263,90 @@ def main():
             BACK_BUTTON("main_menu"),
 
             # Switch for gravity
-            Button(
-                pos=(centre_x, 35),
-                window_scale=scale,
-                function=global_variables.switch_grav,
+            ga.Button(
+                c_pos=(centre_x, 35),
                 size=(310, 50),
-                text="Switch gravity (G)",
-                text_offset=(0, -4),
-                color=(59, 73, 227),
-                hovered_color=(90, 102, 232),
-                clicked_color=(125, 135, 245),
-                sound=pygame.mixer.Sound("sounds/grav.wav"),
+                text_kwargs={
+                    "text": "Switch gravity (G)",
+                    "color": WHITE,
+                    "text_size": 38,
+                    "offset": (0, -4)
+                },
+                color_normal=(59, 73, 227),
+                color_hovered=(90, 102, 232),
+                color_clicked=(125, 135, 245),
                 curve=9,
-                halo=30
+                halo=30,
+                sound=grav,
+                window_scale=scale,
+                function=global_variables.switch_grav
             ),
 
             # Reset button
-            Button(
-                pos=(centre_x+500, 35),
-                window_scale=scale,
-                function=reset_level.reset_level,
+            ga.Button(
+                c_pos=(centre_x+500, 35),
                 size=(160, 50),
-                text="Reset (R)",
-                text_offset=(0, -4),
-                color=(240, 0, 0),
-                hovered_color=(255, 69, 69),
-                clicked_color=(245, 115, 115),
+                text_kwargs={
+                    "text": "Reset (R)",
+                    "color": WHITE,
+                    "text_size": 38,
+                    "offset": (0, -4)
+                },
+                color_normal=(240, 0, 0),
+                color_hovered=(255, 69, 69),
+                color_clicked=(245, 115, 115),
                 curve=9,
-                halo=30
+                halo=30,
+                sound=click,
+                window_scale=scale,
+                function=reset_level.reset_level
             )
 
-        ], "statics": [
-            # Background
-            Image(
-                pos=screen_centre,
-                path="images/bg.png"
-            )
-        ]},
+        ], "statics": []
+    },
     "win_screen":
         {"buttons": [
             CLOSE_BUTTON,
             BACK_BUTTON("main_menu")
 
         ], "statics": [
-            # Background
-            Image(
-                pos=screen_centre,
-                path="images/bg.png"
-            ),
-            Label(
-                pos=screen_centre,
+            ga.Label(
+                c_pos=screen_centre,
                 text="Contratulations, you won!",
-                font_size=100
+                text_size=100,
+                color=WHITE
             )
         ]}
     }
 
-    next_level_button = Button(
-        pos=screen_centre,
-        window_scale=scale,
-        function=reset_level.next_level,
+    next_level_button = ga.Button(
+        c_pos=screen_centre,
         size=(400, 100),
-        text="Next level",
-        text_offset=(0, -9),
-        color=(59, 73, 227),
-        hovered_color=(90, 102, 232),
-        clicked_color=(125, 135, 245),
+        text_kwargs={
+            "text": "Next level",
+            "color": WHITE,
+            "text_size": 75,
+            "offset": (0, -9)
+        },
+        color_normal=(59, 73, 227),
+        color_hovered=(90, 102, 232),
+        color_clicked=(125, 135, 245),
         curve=30,
-        halo=30
+        halo=30,
+        sound=click,
+        window_scale=scale,
+        function=reset_level.next_level
     )
 
+    # fps = ga.Label(
+    #     text="0",
+    #     text_size=30,
+    #     color=WHITE,
+    #     pos=(0, 0)
+    # )
 
     while True:
-        clock.tick()
+        clock.tick(FRAMERATE)
 
         for event in pygame.event.get():
             
@@ -324,11 +357,10 @@ def main():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     close()
-                elif event.key == pygame.K_g:
+                elif event.key == pygame.K_g and current_layout == "in_game":
                     global_variables.switch_grav()
-                    sound = pygame.mixer.Sound("sounds/grav.wav")
-                    pygame.mixer.Sound.play(sound)
-                elif event.key == pygame.K_r:
+                    pygame.mixer.Sound.play(grav)
+                elif event.key == pygame.K_r and current_layout == "in_game":
                     reset_level.reset_level()
                 elif event.key == pygame.K_p:
                     print(player1.pos, player2.pos)
@@ -338,18 +370,11 @@ def main():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 for i in layouts[current_layout]["buttons"]:
                     if i.clicked:
-                        i.execute()
+                        i.run()
                 if global_variables.level_win and next_level_button.clicked:
-                    next_level_button.execute()
+                    next_level_button.run()
 
-        # Resets display
-        screen1080p.fill(BG_COLOR)
-
-        for i in layouts[current_layout]["statics"]:
-            i.render(screen1080p)
-
-        for i in layouts[current_layout]["buttons"]:
-            i.render(screen1080p)
+        BACKGROUND.render(screen1080p)
 
         if current_layout == "in_game":
             try:
@@ -365,7 +390,11 @@ def main():
                 global_variables.level_win = False
 
             if global_variables.level_win:
-                bg = Image(screen_centre, "images/next_level_bg.png")
+                bg = ga.Element(
+                    c_pos=screen_centre,
+                    texture=pygame.image.load("images/next_level_bg.png"),
+                    size=(592, 592)
+                )
                 bg.render(screen1080p)
                 next_level_button.render(screen1080p)
                 global_variables.level_win = True
@@ -376,18 +405,29 @@ def main():
 
 
             if global_variables.current_level == 0 and not global_variables.level_win:
-                info_label_l1 = Label(
-                    pos=(centre_x, centre_y - 40),
+                info_label_l1 = ga.Label(
+                    c_pos=(centre_x, centre_y - 40),
                     text="Get both the astronauts on",
-                    font_size=70
+                    text_size=70,
+                    color=WHITE
                 )
-                info_label_l2 = Label(
-                    pos=(centre_x, centre_y + 40),
+                info_label_l2 = ga.Label(
+                    c_pos=(centre_x, centre_y + 40),
                     text="the doors at the same time",
-                    font_size=70
+                    text_size=70,
+                    color=WHITE
                 )
                 info_label_l1.render(screen1080p)
                 info_label_l2.render(screen1080p)
+
+        for i in layouts[current_layout]["statics"]:
+            i.render(screen1080p)
+
+        for i in layouts[current_layout]["buttons"]:
+            i.render(screen1080p)
+
+        # fps.change_text(str(int(clock.get_fps())))
+        # fps.render(screen1080p)
 
         screen_adapted = pygame.transform.scale(screen1080p, scale)
         screen.blit(screen_adapted, (0, 0))

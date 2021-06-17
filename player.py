@@ -121,18 +121,18 @@ class Player(pygame.sprite.Sprite):
         if (keys[pygame.K_d] or keys[pygame.K_RIGHT]) and (keys[pygame.K_a] or keys[pygame.K_LEFT]):
             self.x_speed = 0
         elif keys[pygame.K_d] or keys[pygame.K_RIGHT]:
-            self.x_speed = SPEED * self._grav
+            self.x_speed = SPEED * self._grav * 0.5
             self.change_dir("right")
         elif keys[pygame.K_a] or keys[pygame.K_LEFT]:
-            self.x_speed = -SPEED * self._grav
+            self.x_speed = -SPEED * self._grav * 0.5
             self.change_dir("left")
         else:
             self.x_speed /= DECELERATION
 
-        self.y_speed += self._grav
+        self.y_speed += self._grav * 0.5
 
         if (keys[pygame.K_SPACE] or keys[pygame.K_UP] or keys[pygame.K_w]) and self.can_jump:
-            self.y_speed = -20 * self._grav / 1.3
+            self.y_speed = -20 * self._grav/1.47
             self.can_jump = False
             pygame.mixer.Sound.play(jump)
 
@@ -185,8 +185,7 @@ class Player(pygame.sprite.Sprite):
 
 player1 = Player(
         base_image="images/astronaut.png",
-        animation_images=["images/walk_1.png", "images/walk_2.png", "images/walk_1.png", "images/walk_2.png",
-                          "images/walk_1.png", "images/walk_2.png", "images/walk_1.png", "images/walk_2.png"],
+        animation_images=["images/walk_1.png", "images/walk_2.png", "images/walk_1.png", "images/walk_2.png"],
         hitbox="auto",
         pos=(550, 974),
         scale=(38, 44),
@@ -196,8 +195,7 @@ player1 = Player(
 
 player2 = Player(
         base_image="images/astronaut.png",
-        animation_images=["images/walk_1.png", "images/walk_2.png", "images/walk_1.png", "images/walk_2.png",
-                          "images/walk_1.png", "images/walk_2.png", "images/walk_1.png", "images/walk_2.png"],
+        animation_images=["images/walk_1.png", "images/walk_2.png", "images/walk_1.png", "images/walk_2.png"],
         hitbox="auto",
         pos=(1350, 780),
         scale=(38, 44),
