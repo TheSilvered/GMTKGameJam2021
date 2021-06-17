@@ -49,9 +49,9 @@ def main():
      
     pygame.mixer.music.play(-1)
 
-    screen_centre = screen1080p.get_width()/2, screen1080p.get_height()/2
-    centre_x = screen1080p.get_width()/2
-    centre_y = screen1080p.get_height()/2
+    screen_centre = (960, 540)
+    centre_x = 960
+    centre_y = 540
 
     scale_width = screen.get_width()
     scale_height = int(1080 * (screen.get_width()/1920))
@@ -63,6 +63,17 @@ def main():
         texture=pygame.image.load("images/bg.png")
     )
     BACKGROUND._texture = BACKGROUND._texture.convert()  # Optimizes blitting
+    
+    info = ga.Label(
+        c_pos=screen_centre,
+        text="Loading...",
+        text_size=100,
+        color=WHITE
+    )
+
+    BACKGROUND.render(screen)
+    info.render(screen)
+    pygame.display.update()
 
     CLOSE_BUTTON = ga.Button(
         c_pos=(1890, 30),
@@ -77,7 +88,7 @@ def main():
         color_normal=(240, 0, 0),
         color_hovered=(255, 69, 69),
         color_clicked=(245, 115, 115),
-        curve=8,
+        curve=10,
         halo=30,
         sound=click,
         window_scale=scale,
@@ -97,7 +108,7 @@ def main():
             color_normal=(59, 73, 227),
             color_hovered=(90, 102, 232),
             color_clicked=(125, 135, 245),
-            curve=8,
+            curve=10,
             halo=30,
             sound=click,
             window_scale=scale,
@@ -114,7 +125,7 @@ def main():
             # Play button
             ga.Button(
                 c_pos=(centre_x, centre_y - 60),
-                size=(500, 100),
+                size=(500, 120),
                 text_kwargs={
                     "text": "Play",
                     "text_size": 75,
@@ -338,12 +349,12 @@ def main():
         function=reset_level.next_level
     )
 
-    # fps = ga.Label(
-    #     text="0",
-    #     text_size=30,
-    #     color=WHITE,
-    #     pos=(0, 0)
-    # )
+    fps = ga.Label(
+        text="0",
+        text_size=30,
+        color=WHITE,
+        pos=(0, 0)
+    )
 
     while True:
         clock.tick(FRAMERATE)
@@ -426,8 +437,8 @@ def main():
         for i in layouts[current_layout]["buttons"]:
             i.render(screen1080p)
 
-        # fps.change_text(str(int(clock.get_fps())))
-        # fps.render(screen1080p)
+        fps.change_text(str(int(clock.get_fps())))
+        fps.render(screen1080p)
 
         screen_adapted = pygame.transform.scale(screen1080p, scale)
         screen.blit(screen_adapted, (0, 0))

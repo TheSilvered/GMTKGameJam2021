@@ -1,8 +1,41 @@
 import pygame
 from .element import Element
 from .label import Label
+from PIL import Image, ImageFilter
 
 pygame.init()
+
+
+def blur(surface, size):
+    w = surface.get_width()
+    h = surface.get_height()
+    ns = pygame.Surface((w, h))
+    ns.convert_alpha()
+    # print(colors)
+    for i in range(w):
+        for j in range(h):
+            avrage = [0, 0, 0, 0]
+            div_count = 0
+            for y in range(-size, size + 1):
+                for x in range(-size, size + 1):
+                    if -size <= x + y <= size + 1:
+                        try:
+                            col = surface.get_at((j-x, i-y))
+                            avrage[0] += col[0]
+                            avrage[1] += col[1]
+                            avrage[2] += col[2]
+                            avrage[3] += col[3]
+                            div_count += 1
+                        except IndexError:
+                            pass
+            if div_count != 0:
+                avrage[0] //= div_count
+                avrage[1] //= div_count
+                avrage[2] //= div_count
+                avrage[3] //= (size + 1) ** 4
+                ns.set_at((j, i), avrage)
+    ns.convert_alpha()
+    return ns
 
 
 class Button(Element):
@@ -75,7 +108,8 @@ class Button(Element):
 
     def maketexture(self, color, halo, text_kwargs):
         main_body = pygame.Surface(self._size)
-        texture = pygame.Surface((self._width + halo*2, self._height + halo*2), pygame.SRCALPHA)
+        texture_size = (self._width + halo*2, self._height + halo*2)
+        texture = pygame.Surface(texture_size, pygame.SRCALPHA)
         if color == (0, 0, 0):
             main_body.set_colorkey((255, 255, 255))
             texture.set_colorkey((255, 255, 255))
@@ -86,21 +120,21 @@ class Button(Element):
         main_body.convert_alpha()
 
         points = (
-            (0                            ,                self._curve + 1),
-            (              self._curve + 1, 0                             ),
-            (self._width - self._curve    , 0                             ),
-            (self._width                  ,                self._curve + 1),
-            (self._width                  , self._height - self._curve    ),
-            (self._width - self._curve    , self._height                  ),
-            (              self._curve + 1, self._height                  ),
-            (0                            , self._height - self._curve    )
+            (0                            , self._curve                   ),
+            (self._curve                  , 0                             ),
+            (self._width - self._curve - 1, 0                             ),
+            (self._width - 1              , self._curve                   ),
+            (self._width - 1              , self._height - self._curve - 1),
+            (self._width - self._curve - 1, self._height - 1              ),
+            (self._curve                  , self._height - 1              ),
+            (0                            , self._height - self._curve - 1)
         )
 
         # Without the "+ 1"s the self._curves would not be consistent
         curve1 = (              self._curve + 1,                self._curve + 1)
-        curve2 = (self._width - self._curve    ,                self._curve + 1)
-        curve3 = (self._width - self._curve    , self._height - self._curve    )
-        curve4 = (              self._curve + 1, self._height - self._curve    )
+        curve2 = (self._width - self._curve - 1,                self._curve + 1)
+        curve3 = (self._width - self._curve - 1, self._height - self._curve - 1)
+        curve4 = (              self._curve + 1, self._height - self._curve - 1)
 
         pygame.draw.polygon(main_body, color, points)
 
@@ -109,7 +143,6 @@ class Button(Element):
         pygame.draw.circle(main_body, color, curve3, self._curve)
         pygame.draw.circle(main_body, color, curve4, self._curve)
 
-        texture.blit(main_body, (halo, halo))
 
         if halo > 0 and self._halo_i > 0:
             alpha = 255 / (halo / self._halo_i)
@@ -120,13 +153,33 @@ class Button(Element):
                 pos = ((i+halo) // 2, (i+halo) // 2)
                 new_bs = pygame.transform.scale(main_body, new_size)
                 texture.blit(new_bs, pos)
+            alphas = []
+            for i in range(texture_size[0]):
+                alphas.append([])
+                for j in range(texture_size[1]):
+                    alphas[i].append(texture.get_at((i, j))[3])
 
+            texture_str = pygame.image.tostring(texture, "RGBA")
+            blured_halo = Image.frombytes("RGBA", texture_size, texture_str)
+            blured_halo = blured_halo.filter(ImageFilter.GaussianBlur(radius=6))
+            blured_halo_str = blured_halo.tobytes()
+            texture = pygame.image.fromstring(blured_halo_str, texture_size, "RGBA")
+
+            for i in range(texture_size[0]):
+                for j in range(texture_size[1]):
+                    r, g, b, _ = texture.get_at((i, j))
+                    a = alphas[i][j]
+                    texture.set_at((i, j), (r, g, b, a))
+
+        main_body.set_alpha(255)
+        texture.blit(main_body, (halo, halo))
         text_kwargs["c_pos"] = (texture.get_width()/2, texture.get_height()/2)
         text = Label(**text_kwargs)
         text.x += text._anc_offset[0]
         text.y += text._anc_offset[1]
         text.render(texture)
-        return texture.convert_alpha()
+        texture.convert_alpha()
+        return texture
 
     def render(self, surface):
         if self.clicked:

@@ -33,8 +33,7 @@ class Label(Element):
         self._color = color
         texture = self._font.render(text, True, self._color)
         texture = pygame.transform.rotate(texture, self._tilt)
-        texture = texture.convert_alpha()
-
+        texture.convert_alpha()
         size = (texture.get_width(), texture.get_height())
 
         super().__init__(pos, c_pos, size, None, texture, parent, anchor, c_anchor, offset, visible)
