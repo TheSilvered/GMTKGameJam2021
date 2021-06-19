@@ -85,11 +85,12 @@ def main():
             "text_size": 30,
             "offset": (0, -2)
         },
-        color_normal=(240, 0, 0),
-        color_hovered=(255, 69, 69),
-        color_clicked=(245, 115, 115),
+        # color_normal=(240, 0, 0),
+        # color_hovered=(255, 69, 69),
+        # color_clicked=(245, 115, 115),
+        make_texture=False,
         curve=10,
-        halo=30,
+        halo=15,
         sound=click,
         window_scale=scale,
         function=close,
@@ -105,11 +106,12 @@ def main():
                 "color": WHITE,
                 "offset": (0, -2)
             },
-            color_normal=(59, 73, 227),
-            color_hovered=(90, 102, 232),
-            color_clicked=(125, 135, 245),
+            # color_normal=(59, 73, 227),
+            # color_hovered=(90, 102, 232),
+            # color_clicked=(125, 135, 245),
+            make_texture=False,
             curve=10,
-            halo=30,
+            halo=15,
             sound=click,
             window_scale=scale,
             function=set_layout,
@@ -132,11 +134,12 @@ def main():
                     "color": WHITE,
                     "offset": (0, -9)
                 },
-                color_normal=(59, 73, 227),
-                color_hovered=(90, 102, 232),
-                color_clicked=(125, 135, 245),
+                # color_normal=(59, 73, 227),
+                # color_hovered=(90, 102, 232),
+                # color_clicked=(125, 135, 245),
+                make_texture=False,
                 curve=30,
-                halo=30,
+                halo=15,
                 sound=click,
                 window_scale=scale,
                 function=set_layout,
@@ -153,11 +156,12 @@ def main():
                     "color": WHITE,
                     "offset": (0, -5)
                 },
-                color_normal=(27, 191, 71),
-                color_hovered=(35, 217, 84),
-                color_clicked=(39, 227, 89),
+                # color_normal=(27, 191, 71),
+                # color_hovered=(35, 217, 84),
+                # color_clicked=(39, 227, 89),
+                make_texture=False,
                 curve=25,
-                halo=30,
+                halo=15,
                 sound=click,
                 window_scale=scale,
                 function=set_layout,
@@ -207,11 +211,12 @@ def main():
                     "color": WHITE,
                     "offset": (0, -3)
                 },
-                color_normal=(27, 191, 71),
-                color_hovered=(35, 217, 84),
-                color_clicked=(39, 227, 89),
+                # color_normal=(27, 191, 71),
+                # color_hovered=(35, 217, 84),
+                # color_clicked=(39, 227, 89),
+                make_texture=False,
                 curve=25,
-                halo=30,
+                halo=15,
                 sound=click,
                 window_scale=scale,
                 function=wb.open,
@@ -227,11 +232,12 @@ def main():
                     "color": WHITE,
                     "offset": (0, -3)
                 },
-                color_normal=(245, 17, 66),
-                color_hovered=(245, 54, 95),
-                color_clicked=(232, 107, 134),
+                # color_normal=(245, 17, 66),
+                # color_hovered=(245, 54, 95),
+                # color_clicked=(232, 107, 134),
+                make_texture=False,
                 curve=25,
-                halo=30,
+                halo=15,
                 sound=click,
                 window_scale=scale,
                 function=wb.open,
@@ -283,11 +289,12 @@ def main():
                     "text_size": 38,
                     "offset": (0, -4)
                 },
-                color_normal=(59, 73, 227),
-                color_hovered=(90, 102, 232),
-                color_clicked=(125, 135, 245),
+                # color_normal=(59, 73, 227),
+                # color_hovered=(90, 102, 232),
+                # color_clicked=(125, 135, 245),
+                make_texture=False,
                 curve=9,
-                halo=30,
+                halo=15,
                 sound=grav,
                 window_scale=scale,
                 function=global_variables.switch_grav
@@ -303,11 +310,12 @@ def main():
                     "text_size": 38,
                     "offset": (0, -4)
                 },
-                color_normal=(240, 0, 0),
-                color_hovered=(255, 69, 69),
-                color_clicked=(245, 115, 115),
+                # color_normal=(240, 0, 0),
+                # color_hovered=(255, 69, 69),
+                # color_clicked=(245, 115, 115),
+                make_texture=False,
                 curve=9,
-                halo=30,
+                halo=15,
                 sound=click,
                 window_scale=scale,
                 function=reset_level.reset_level
@@ -339,15 +347,27 @@ def main():
             "text_size": 75,
             "offset": (0, -9)
         },
-        color_normal=(59, 73, 227),
-        color_hovered=(90, 102, 232),
-        color_clicked=(125, 135, 245),
+        # color_normal=(59, 73, 227),
+        # color_hovered=(90, 102, 232),
+        # color_clicked=(125, 135, 245),
+        make_texture=False,
         curve=30,
-        halo=30,
+        halo=15,
         sound=click,
         window_scale=scale,
         function=reset_level.next_level
     )
+
+    for i in layouts:
+        for idx, j in enumerate(layouts[i]["buttons"]):
+            # j.save_textures(f"images/{i}{idx}")
+            with open(f"images/{i}{idx}tn.texture", "rb") as f:
+                tn = f.read()
+            with open(f"images/{i}{idx}th.texture", "rb") as f:
+                th = f.read()
+            with open(f"images/{i}{idx}tc.texture", "rb") as f:
+                tc = f.read()
+            j.buffertexture(tn, th, tc)
 
     fps = ga.Label(
         text="0",
@@ -357,12 +377,9 @@ def main():
     )
 
     while True:
-        clock.tick(FRAMERATE)
+        t = clock.tick(FRAMERATE) / (1000/FRAMERATE)
 
         for event in pygame.event.get():
-            
-            # Even in fullscreen, this might appen
-            # Ex. when you right click on the icon on the taskbar
             if event.type == pygame.QUIT:
                 close()
             if event.type == pygame.KEYDOWN:
@@ -411,8 +428,8 @@ def main():
                 global_variables.level_win = True
 
             else:
-                player1.render(screen1080p)
-                player2.render(screen1080p)
+                player1.render(screen1080p, t)
+                player2.render(screen1080p, t)
 
 
             if global_variables.current_level == 0 and not global_variables.level_win:

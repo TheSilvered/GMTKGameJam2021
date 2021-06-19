@@ -28,11 +28,10 @@ class Player(pygame.sprite.Sprite):
             for i in range(len(self._anim)):
                 self._anim[i] = pygame.transform.flip(self._anim[i], False, True)
 
-        self._facing_dir = "right"
+        self._flipped_x = False
+        self._flipped_y = inv_grav
 
-        self._grav = -global_variables.gravity if inv_grav else global_variables.gravity
-        self._prev_grav = self._grav
-        self._starting_grav = self._grav
+        self._inv_grav = inv_grav
 
         if hitbox == "auto":
             hitbox = pygame.Rect(pos, (self.image.get_width(), self.image.get_height()))
@@ -92,49 +91,48 @@ class Player(pygame.sprite.Sprite):
         self.x = value[0]
         self.y = value[1]
 
-    def change_dir(self, dir_):
-        if dir_ == self._facing_dir and self._grav < 0:
-            self.image = pygame.transform.flip(self.image, True, False)
-            for i in range(len(self._anim)):
-                self._anim[i] = pygame.transform.flip(self._anim[i], True, False)
-            self._facing_dir = "left" if dir_ == "right" else "right"
-            
-        elif dir_ != self._facing_dir and self._grav > 0:
-            self.image = pygame.transform.flip(self.image, True, False)
-            for i in range(len(self._anim)):
-                self._anim[i] = pygame.transform.flip(self._anim[i], True, False)
-            self._facing_dir = dir_
+    def flip_x(self, flip):
+        if self._flipped_x == flip:
+            return
+        self.image = pygame.transform.flip(self.image, True, False)
+        for i in range(len(self._anim)):
+            self._anim[i] = pygame.transform.flip(self._anim[i], True, False)
+        self._flipped_x = flip
 
-    def move(self):
-        if self._starting_grav < 0:
-            self._grav = -global_variables.gravity
-        else:
-            self._grav = global_variables.gravity
+    def flip_y(self, flip):
+        if self._flipped_y == flip:
+            return
+        self.image = pygame.transform.flip(self.image, False, True)
+        for i in range(len(self._anim)):
+            self._anim[i] = pygame.transform.flip(self._anim[i], False, True)
+        self._flipped_y = flip
 
-        if self._prev_grav != self._grav:
-            self.image = pygame.transform.flip(self.image, False, True)
-            for i in range(len(self._anim)):
-                self._anim[i] = pygame.transform.flip(self._anim[i], False, True)
-        self._prev_grav = self._grav
+    def move(self, t):
+        invgrav = -1 if self._inv_grav else 1
+        is_grav_inv = global_variables.gravity > 0
+        inv = invgrav if global_variables.gravity > 0 else -invgrav
+        inv_flip = invgrav + 1 and is_grav_inv or invgrav - 1 and not is_grav_inv
+        self.flip_y(not inv_flip)
 
         keys = pygame.key.get_pressed()
         if (keys[pygame.K_d] or keys[pygame.K_RIGHT]) and (keys[pygame.K_a] or keys[pygame.K_LEFT]):
-            self.x_speed = 0
+            self.x_speed /= DECELERATION
         elif keys[pygame.K_d] or keys[pygame.K_RIGHT]:
-            self.x_speed = SPEED * self._grav * 0.5
-            self.change_dir("right")
+            self.x_speed = SPEED * inv * t
+            self.flip_x(not inv_flip)
         elif keys[pygame.K_a] or keys[pygame.K_LEFT]:
-            self.x_speed = -SPEED * self._grav * 0.5
-            self.change_dir("left")
+            self.x_speed = -SPEED * inv * t
+            self.flip_x(inv_flip)
         else:
             self.x_speed /= DECELERATION
 
-        self.y_speed += self._grav * 0.5
-
+        self.y_speed += global_variables.gravity * invgrav
         if (keys[pygame.K_SPACE] or keys[pygame.K_UP] or keys[pygame.K_w]) and self.can_jump:
-            self.y_speed = -20 * self._grav/1.47
+            self.y_speed = -JUMP_HEIGHT * inv
             self.can_jump = False
             pygame.mixer.Sound.play(jump)
+        if abs(self.y_speed) > self.rect.height:
+            self.y_speed = self.rect.height if self.y_speed > 0 else -self.rect.height
 
         self.x += self.x_speed
         if self.collisions > 0:
@@ -149,8 +147,9 @@ class Player(pygame.sprite.Sprite):
 
         self.y += self.y_speed
         if self.collisions > 0:
-            if self.y_speed < 0 and self._grav < 0 or\
-               self.y_speed > 0 and self._grav > 0:
+            # inv - i == not inv + 1
+            if self.y_speed < 0 and inv - 1 or\
+               self.y_speed > 0 and inv + 1:
                 self.can_jump = True
 
             # Prevents the game from freezing
@@ -161,8 +160,8 @@ class Player(pygame.sprite.Sprite):
             self.y_speed = 0
 
 
-    def render(self, surface):
-        self.move()
+    def render(self, surface, time_elapsed):
+        self.move(time_elapsed)
         self.rect.update(self.pos, (self.rect.width, self.rect.height))
         self._tick_count += 1
         if self._tick_count >= FRAMERATE:

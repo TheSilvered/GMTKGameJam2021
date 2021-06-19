@@ -1,4 +1,4 @@
-gravity = 1
+gravity = 0.3
 current_level = 0
 level_win = False
 
